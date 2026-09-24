@@ -7,10 +7,15 @@ description: pull requestのルールと作成方法を定めるスキル
 
 このスキルは、pull requestのルールを定め、プロジェクトのコードベースに対する変更を明確かつ一貫性のある方法で記録することを目的としています。適切なpull requestは、コードの変更内容を理解しやすくし、将来のメンテナンスやチーム内でのコミュニケーションを円滑にします。
 
+## 言語の分担
+
+- コミットメッセージは英語（`github-commit` / `.agents/rules/github.mdc`）
+- Issue と PR のタイトル・本文は日本語
+
 ## プルリクエストのルール
 
 - **言語**: プルリクエストのタイトルと説明はすべて日本語で記述してください。
-- **タイトル**: `<type>(<scope>): <description>` の形式（Conventional Commits準拠）にしてください。
+- **タイトル**: `<type>: <description>` の形式（Conventional Commits準拠）。scope は付けない。
 - **本文**: 「概要」「関連Issue（Closes #<number>）」「変更点」「動作確認」のセクションを設けてください。
 - **変更点**: 個々のコミット内容を分析して、技術的に重要なポイントを抽出してください。
 - **Issueの紐付け**: PR作成時の説明文（Description）には、必ず関連する Issue 番号を記述してください。
@@ -25,11 +30,12 @@ description: pull requestのルールと作成方法を定めるスキル
 - mdファイル作成後、以下のように `gh` コマンドを使ってPRを作成します。
   ```bash
   gh pr create \
-    --title "<type>(<scope>): <description>" \
+    --title "<type>: <description>" \
     --body-file /tmp/<ファイル名>.md \
-    --base main \
+    --base dev \
     --head <ブランチ名>
   ```
-  - `--title` は「プルリクエストのルール」に従い `<type>(<scope>): <description>` の形式にします。
+  - 作業ブランチ → `dev` が既定。`--base main` はリリース（`dev` → `main`）のときだけ使う。
+  - `--title` は「プルリクエストのルール」に従い `<type>: <description>` の形式にします。タイトルの description は日本語。scope は付けない。
   - PR作成後、表示されたURLをユーザーに共有します。
   - 作成した一時ファイル（`/tmp/<ファイル名>.md`）を必ず削除してください。

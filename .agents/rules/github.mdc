@@ -1,0 +1,50 @@
+---
+description: Git とブランチ運用（main / dev / 作業ブランチ、commit、push）
+alwaysApply: true
+---
+
+# Git
+
+- NEVER: コミットに Co-Authored-by を付けない
+- NEVER: `main` へ直接 commit / push / merge しない。更新は PR のみ。`main` の pull は可
+- NEVER: ユーザーの明示がなければ `dev` へも直接 commit / push しない。更新は PR のみ。明示があれば直接操作してよい
+- ALWAYS: 作業ブランチは `dev` から切る。作業ブランチ → `dev`、リリースは `dev` → `main`。どちらも PR
+- ALWAYS: コミットメッセージは Conventional Commits。後述の形式に従う
+- ALWAYS: コミットメッセージは「何をしたか」より「なぜ変えたか」を書く
+- ALWAYS: ブランチ名は `{type}/{issue_number?}/{branch_name}`。後述に従う。これから切るブランチはこの形式。既存ブランチは改名しない
+- ALWAYS: コミットは英語。Issue と PR のタイトル・本文は日本語
+- NEVER: `codex/` など、指定形式以外の prefix を付けない
+- ALWAYS: 独立した関心事はコミットを分ける。ステージ済みでも単位で分割する
+- ALWAYS: sandbox で `git push` などがネットワーク制限に当たったら、ユーザー確認を挟んで承認を得る
+
+# コミットメッセージ
+
+英語の Conventional Commits。
+
+```
+{type}: {message}
+```
+
+- type: feat, fix, refactor, chore など
+- message: 英語
+- scope は付けない
+
+```
+feat: add github-commit skill
+docs: clarify public profile requirements
+```
+
+# ブランチ名
+
+```
+{type}/{issue_number?}/{branch_name}
+```
+
+- type: feat, fix, refactor, chore など
+- issue_number: ユーザーが Issue 番号を出したときだけ入れる。確認して聞かない
+- branch_name: 作業内容
+
+```
+feat/123/login-page
+perf/reduce-rendering
+```
