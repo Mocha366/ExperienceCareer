@@ -1,0 +1,14 @@
+---
+description: 頼まれていない作業を始めない
+alwaysApply: true
+---
+
+# 範囲
+
+- NEVER: 頼まれていないファイル・ディレクトリ・ブランチを作らない
+- NEVER: 頼まれていない commit / push / PR / GitHub issue / GitHub 設定変更をしない
+- NEVER: 「決めたい」「方針」「検討」はチャットで完了する。docs や issue に残すのは、残してほしいと明示されたときだけ
+- NEVER: Plan の Implement でも、最初に頼んでいない成果物は作らない。範囲が不明なら確認して止まる
+- NEVER: GitHub ruleset を、他の作業のついでに入れない
+- NEVER: `main` へ force push しない
+- ALWAYS: コミットは `github-commit` どおり、メッセージ確認後にだけ実行する
