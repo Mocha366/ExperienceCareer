@@ -2,7 +2,7 @@ export function Profile() {
   const name = "情報太郎";
   const school = "情報科学専門学校";
   const department = "情報セキュリティ学科";
-  const bio = "人とばを繋ぐイベント運営を通して、チームで作る体験の可能性を学んでいます。";
+  const bio = "人と場を繋ぐイベント運営を通して、チームで作る体験の可能性を学んでいます。";
   const areas = ["企画", "運営", "広報", "配信", "MC"];
 
   return (

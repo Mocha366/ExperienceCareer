@@ -39,7 +39,7 @@ export function TimelineItem({
         <h3 className="font-semibold">{title}</h3>
         <p className="mt-1 text-sm text-[#c56b4a]">{role}</p>
         <p className="mt-2 text-xs text-[#6b6560]">
-          {formatSchedule(startDate, endDate)} / 来場者数{attendance}人
+          {formatSchedule(startDate, endDate)} / 来場者{attendance}人
         </p>
         <div className="mt-4 flex flex-wrap items-center gap-2 text-xs">
           {areas.length > 0 && (
