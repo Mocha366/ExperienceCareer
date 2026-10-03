@@ -41,7 +41,7 @@ export function ExperienceDetail({ experience, onClose }: ExperienceDetailProps)
         role="dialog"
         aria-modal="true"
         aria-labelledby="experience-detail-title"
-        className="max-h-full w-full max-w-2xl overflow-y-auto bg-[#f6f4ef] p-8 text-[#2b2b2b]"
+        className="max-h-full w-full max-w-5xl overflow-y-auto bg-[#f6f4ef] p-8 text-[#2b2b2b]"
       >
         <div className="flex justify-end">
           <button type="button" onClick={onClose} aria-label="閉じる" className="text-sm">
