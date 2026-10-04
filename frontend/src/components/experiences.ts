@@ -42,7 +42,7 @@ export const experiences: Experience[] = [
     organizer: "情報科学専門学校 学園祭実行委員会",
     summary: "学生と地域の方が一緒に楽しめるステージを、企画から当日の進行まで担当しました。",
     responsibilities: [
-      "全体スケジュールとWSBの作成",
+      "全体スケジュールとWBSの作成",
       "出演団体との進行調整",
       "当日の音響・転換・進行管理",
       "ステージMC",
