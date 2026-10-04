@@ -47,11 +47,7 @@ export function TimelineItem({ experience, onOpen }: TimelineItemProps) {
       </button>
       {photoUrl && (
         <button type="button" onClick={onOpen} className="col-start-2 md:col-start-3">
-          <img
-            src={photoUrl}
-            alt=""
-            className="col-start-2 h-24 w-32 object-cover md:col-start-3"
-          />
+          <img src={photoUrl} alt="" className="h-24 w-32 object-cover md:col-start-3" />
         </button>
       )}
     </article>
