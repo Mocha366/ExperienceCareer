@@ -1,6 +1,6 @@
 import type { Experience } from "./experiences";
 import { formatSchedule } from "./experiences";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 type ExperienceDetailProps = {
   experience: Experience;
@@ -8,6 +8,9 @@ type ExperienceDetailProps = {
 };
 
 export function ExperienceDetail({ experience, onClose }: ExperienceDetailProps) {
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLElement>(null);
+
   const {
     title,
     role,
@@ -27,24 +30,80 @@ export function ExperienceDetail({ experience, onClose }: ExperienceDetailProps)
   } = experience;
 
   useEffect(() => {
-    const previous = document.body.style.overflow;
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+
+    const previousOverflow = document.body.style.overflow;
+    const previouslyFocused = document.activeElement as HTMLElement | null;
     document.body.style.overflow = "hidden";
+    closeButtonRef.current?.focus();
+
+    const getFocusable = () =>
+      Array.from(
+        dialog.querySelectorAll<HTMLElement>(
+          'button, a[href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((el) => !el.hasAttribute("disabled"));
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+        return;
+      }
+
+      if (event.key !== "Tab") return;
+
+      const focusable = getFocusable();
+      if (focusable.length === 0) {
+        event.preventDefault();
+        dialog.focus();
+        return;
+      }
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement;
+      const focusInside = active instanceof Node && dialog.contains(active);
+
+      if (!event.shiftKey && (!focusInside || active === last)) {
+        event.preventDefault();
+        first.focus();
+        return;
+      }
+
+      if (event.shiftKey && (!focusInside || active === first)) {
+        event.preventDefault();
+        last.focus();
+      }
+    };
+
+    document.addEventListener("keydown", onKeyDown);
 
     return () => {
-      document.body.style.overflow = previous;
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", onKeyDown);
+      previouslyFocused?.focus();
     };
-  }, []);
+  }, [onClose]);
 
   return (
     <div className="fixed inset-0 z-10 flex justify-center bg-[#2b2b2b]/40 px-4 py-10">
       <article
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="experience-detail-title"
+        tabIndex={-1}
         className="max-h-full w-full max-w-5xl overflow-y-auto bg-[#f6f4ef] p-8 text-[#2b2b2b]"
       >
         <div className="flex justify-end">
-          <button type="button" onClick={onClose} aria-label="閉じる" className="text-sm">
+          <button
+            ref={closeButtonRef}
+            type="button"
+            onClick={onClose}
+            aria-label="閉じる"
+            className="text-sm"
+          >
             ×
           </button>
         </div>
