@@ -1,11 +1,15 @@
 import { useState } from "react";
 import { ExperienceDetail } from "./ExperienceDetail";
 import { TimelineItem } from "./TimelineItem";
-import { experiences } from "./experiences";
+import type { Experience } from "./experiences";
 
-export function Timeline() {
-  const [selectedTitle, setSelectedTitle] = useState<string | null>(null);
-  const selected = experiences.find((experience) => experience.title === selectedTitle);
+type Props = {
+  experiences: Experience[];
+};
+
+export function Timeline({ experiences }: Props) {
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const selected = experiences.find((experience) => experience.id === selectedId);
 
   return (
     <section className="py-12">
@@ -13,15 +17,13 @@ export function Timeline() {
       <div className="flex flex-col gap-10">
         {experiences.map((experience) => (
           <TimelineItem
-            key={experience.title}
+            key={experience.id}
             experience={experience}
-            onOpen={() => setSelectedTitle(experience.title)}
+            onOpen={() => setSelectedId(experience.id)}
           />
         ))}
       </div>
-      {selected && (
-        <ExperienceDetail experience={selected} onClose={() => setSelectedTitle(null)} />
-      )}
+      {selected && <ExperienceDetail experience={selected} onClose={() => setSelectedId(null)} />}
     </section>
   );
 }
