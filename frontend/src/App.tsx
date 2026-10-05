@@ -1,14 +1,12 @@
-import { Header } from "./components/Header";
-import { Profile } from "./components/Profile";
-import { Timeline } from "./components/Timeline";
+import { Navigate, Route, Routes } from "react-router-dom";
+import { PublicProfilePage } from "./pages/PublicProfilePage";
 
 function App() {
   return (
-    <main className="mx-auto min-h-screen max-w-5xl bg-[#f6f4ef] px-8 text-[#2b2b2b]">
-      <Header />
-      <Profile />
-      <Timeline />
-    </main>
+    <Routes>
+      <Route path="/" element={<Navigate to="/tarou" replace />} />
+      <Route path="/:username" element={<PublicProfilePage />} />
+    </Routes>
   );
 }
 
