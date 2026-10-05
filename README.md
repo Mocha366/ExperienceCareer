@@ -11,6 +11,49 @@
 
 - Node.js（フロント。CI では 22）
 - Go（バックエンド。バージョンは `backend/go.mod` を見る）
+- Docker（ローカルの PostgreSQL。Compose 付き）
+
+## PostgreSQL（ローカル）
+
+`backend/` の Docker Compose で Postgres を起動する。いまの公開 API はまだメモリ上のダミーを読む。テーブル作成や Go からの接続は別 issue。
+
+初回だけ環境変数ファイルを用意する（`.env` はコミットしない）。
+
+```bash
+cd backend
+cp .env.example .env
+```
+
+必要なら `.env` のユーザ / パスワード / DB 名 / ポートを変える。変数の意味は `.env.example` を見る。ホスト側のポートはデフォルト **5433**（Mac で 5432 が既存 Postgres に使われていることが多いため）。Go などホストからつなぐときは `localhost:5433`。
+
+起動（いつも `backend/` で実行する）:
+
+```bash
+cd backend
+docker compose up -d
+```
+
+接続確認（`.env` のユーザ・DB 名に合わせる。デフォルトはどちらも `experience`）:
+
+```bash
+cd backend
+docker compose exec db psql -U experience -d experience -c '\conninfo'
+docker compose exec db psql -U experience -d experience -c 'SELECT 1'
+```
+
+止める（データは volume に残る）:
+
+```bash
+cd backend
+docker compose down
+```
+
+volume ごと消すとき（中身も消える）:
+
+```bash
+cd backend
+docker compose down -v
+```
 
 ## フロントエンド
 
