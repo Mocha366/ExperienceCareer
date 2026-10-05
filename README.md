@@ -20,7 +20,9 @@ npm install
 npm run dev
 ```
 
-ブラウザで表示を確認する。
+公開プロフィールは Go API から取得する。**バックエンドとフロントを両方起動**してからブラウザで確認する（下の「公開プロフィールをローカルで見る」）。
+
+開発時は Vite が `/api` を `http://localhost:8080` に転送する（`frontend/vite.config.ts` の proxy）。`npm run build` 後の静的配信では proxy は効かない。
 
 変更を出す前に、CI と同じチェックをローカルで通す。
 
@@ -85,6 +87,17 @@ gofmt -w .
 ```
 
 `go build -o server .` などでできた実行ファイルはコミットしない（`.gitignore` で `/backend/server` を無視している）。
+
+## 公開プロフィールをローカルで見る
+
+1. ターミナル A: `cd backend` → `go run ./cmd/server`（`:8080`）
+2. ターミナル B: `cd frontend` → `npm run dev`（`:5173`）
+3. ブラウザで次を開く:
+   - `http://localhost:5173/tarou` … ダミーデータの公開プロフィール（存在する Username）
+   - `http://localhost:5173/nobody` … プロフィールが見つからない表示
+   - `http://localhost:5173/` … いまは `/tarou` にリダイレクト（デモ用）
+
+API だけ確認する場合は、バックエンド起動後に上記「バックエンド」の `curl` を使う。フロント経由では `curl -i http://localhost:5173/api/profiles/tarou` でも同じ JSON が返る（proxy 経由）。
 
 ## CI
 
