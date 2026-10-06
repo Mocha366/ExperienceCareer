@@ -15,7 +15,7 @@
 
 ## PostgreSQL（ローカル）
 
-`backend/` の Docker Compose で Postgres を起動する。いまの公開 API はまだメモリ上のダミーを読む。Go からの接続は別 issue。
+`backend/` の Docker Compose で Postgres を起動する。いまの公開 API のデータはまだメモリ上のダミー。サーバ起動時に Postgres へ接続確認する（読め替えは別 issue）。
 
 初回だけ環境変数ファイルを用意する（`.env` はコミットしない）。
 
@@ -43,7 +43,7 @@ docker compose exec db psql -U experience -d experience -c 'SELECT 1'
 
 ### テーブルを作る（migration）
 
-DB 起動後、SQL を流して Profile / Experience 用の表を作る（Go 接続は別）。
+DB 起動後、SQL を流して Profile / Experience 用の表を作る。
 
 ```bash
 cd backend
@@ -122,17 +122,20 @@ npm run fmt
 
 ## バックエンド
 
-API サーバを起動する。
+API サーバを起動する。**先に Postgres を起動しておく**（上の「PostgreSQL（ローカル）」）。起動時に DB へ接続し、失敗したらサーバは起動しない。接続に使う値は環境変数 `POSTGRES_*`（未設定なら `.env.example` と同じデフォルト。ポートは 5433）。
 
 ```bash
 cd backend
+docker compose up -d
 go run ./cmd/server
 ```
+
+ログに `connected to postgres` と `listening on http://localhost:8080` が出ればよい。
 
 別のターミナルで確認する。
 
 ```bash
-# 存在するユーザー → 200 と JSON
+# 存在するユーザー → 200 と JSON（いまはメモリのダミー）
 curl -i http://localhost:8080/api/profiles/tarou
 
 # 存在しないユーザー → 404
@@ -170,7 +173,7 @@ gofmt -w .
 
 ## 公開プロフィールをローカルで見る
 
-1. ターミナル A: `cd backend` → `go run ./cmd/server`（`:8080`）
+1. ターミナル A: `cd backend` → `docker compose up -d` → `go run ./cmd/server`（`:8080`）
 2. ターミナル B: `cd frontend` → `npm run dev`（`:5173`）
 3. ブラウザで次を開く:
    - `http://localhost:5173/tarou` … ダミーデータの公開プロフィール（存在する Username）
