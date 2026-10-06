@@ -15,7 +15,7 @@
 
 ## PostgreSQL（ローカル）
 
-`backend/` の Docker Compose で Postgres を起動する。いまの公開 API のデータはまだメモリ上のダミー。サーバ起動時に Postgres へ接続確認する（読め替えは別 issue）。
+`backend/` の Docker Compose で Postgres を起動する。公開プロフィール API は DB（シードの `tarou` など）から読む。サーバ起動時にも Postgres へ接続する。
 
 初回だけ環境変数ファイルを用意する（`.env` はコミットしない）。
 
@@ -61,7 +61,7 @@ docker compose exec db psql -U experience -d experience -c '\dt'
 
 ### ダミーデータを入れる（シード）
 
-migration のあと、公開プロフィール用のダミー（`tarou`）を入れる。公開 API はまだメモリを読む。
+migration のあと、公開プロフィール用のダミー（`tarou`）を入れる。公開 API はこのシードを読む。
 
 ```bash
 cd backend
@@ -135,7 +135,7 @@ go run ./cmd/server
 別のターミナルで確認する。
 
 ```bash
-# 存在するユーザー → 200 と JSON（いまはメモリのダミー）
+# 存在するユーザー（シードの tarou）→ 200 と JSON
 curl -i http://localhost:8080/api/profiles/tarou
 
 # 存在しないユーザー → 404
@@ -173,10 +173,10 @@ gofmt -w .
 
 ## 公開プロフィールをローカルで見る
 
-1. ターミナル A: `cd backend` → `docker compose up -d` → `go run ./cmd/server`（`:8080`）
+1. ターミナル A: `cd backend` → `docker compose up -d` →（初回は migration・シード）→ `go run ./cmd/server`（`:8080`）
 2. ターミナル B: `cd frontend` → `npm run dev`（`:5173`）
 3. ブラウザで次を開く:
-   - `http://localhost:5173/tarou` … ダミーデータの公開プロフィール（存在する Username）
+   - `http://localhost:5173/tarou` … DB の公開プロフィール（シードの Username）
    - `http://localhost:5173/nobody` … プロフィールが見つからない表示
    - `http://localhost:5173/` … いまは `/tarou` にリダイレクト（デモ用）
 
