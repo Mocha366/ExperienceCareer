@@ -5,11 +5,19 @@ import (
 	"net/http"
 
 	"github.com/Mocha366/ExperienceCareer/backend/internal/infrastructure/memory"
+	"github.com/Mocha366/ExperienceCareer/backend/internal/infrastructure/postgres"
 	httpapi "github.com/Mocha366/ExperienceCareer/backend/internal/presentation/http"
 	"github.com/Mocha366/ExperienceCareer/backend/internal/usecase"
 )
 
 func main() {
+	db, err := postgres.Open()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+	log.Printf("connected to postgres")
+
 	repo := memory.NewProfileRepository()
 	getPublicProfile := usecase.NewGetPublicProfile(repo)
 	profileHandler := httpapi.NewProfileHandler(getPublicProfile)
