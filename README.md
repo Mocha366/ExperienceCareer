@@ -15,7 +15,7 @@
 
 ## PostgreSQL（ローカル）
 
-`backend/` の Docker Compose で Postgres を起動する。いまの公開 API はまだメモリ上のダミーを読む。テーブル作成や Go からの接続は別 issue。
+`backend/` の Docker Compose で Postgres を起動する。いまの公開 API はまだメモリ上のダミーを読む。Go からの接続やシードは別 issue。
 
 初回だけ環境変数ファイルを用意する（`.env` はコミットしない）。
 
@@ -41,6 +41,24 @@ docker compose exec db psql -U experience -d experience -c '\conninfo'
 docker compose exec db psql -U experience -d experience -c 'SELECT 1'
 ```
 
+### テーブルを作る（migration）
+
+DB 起動後、SQL を流して Profile / Experience 用の表を作る（シードや Go 接続は別）。
+
+```bash
+cd backend
+docker compose exec -T db psql -U experience -d experience < migrations/001_create_profiles_and_experiences.sql
+```
+
+表があることの確認:
+
+```bash
+cd backend
+docker compose exec db psql -U experience -d experience -c '\dt'
+```
+
+`profiles` / `experiences` / `experience_areas` / `experience_event_types` / `experience_responsibilities` が見えればよい。SQL は `IF NOT EXISTS` なので、同じファイルを再度流しても表が既にあればスキップされる。
+
 止める（データは volume に残る）:
 
 ```bash
@@ -48,7 +66,7 @@ cd backend
 docker compose down
 ```
 
-volume ごと消すとき（中身も消える）:
+volume ごと消すとき（中身も消える。表も消える）:
 
 ```bash
 cd backend
