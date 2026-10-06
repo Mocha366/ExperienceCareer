@@ -43,11 +43,12 @@ docker compose exec db psql -U experience -d experience -c 'SELECT 1'
 
 ### テーブルを作る（migration）
 
-DB 起動後、SQL を流して Profile / Experience 用の表を作る。
+DB 起動後、SQL を番号順に流す。`001` で Profile / Experience、`003` で Account（ログイン主体）と `profiles.account_id`。
 
 ```bash
 cd backend
 docker compose exec -T db psql -U experience -d experience < migrations/001_create_profiles_and_experiences.sql
+docker compose exec -T db psql -U experience -d experience < migrations/003_create_accounts.sql
 ```
 
 表があることの確認:
@@ -55,13 +56,16 @@ docker compose exec -T db psql -U experience -d experience < migrations/001_crea
 ```bash
 cd backend
 docker compose exec db psql -U experience -d experience -c '\dt'
+docker compose exec db psql -U experience -d experience -c '\d profiles'
 ```
 
-`profiles` / `experiences` / `experience_areas` / `experience_event_types` / `experience_responsibilities` が見えればよい。SQL は `IF NOT EXISTS` なので、同じファイルを再度流しても表が既にあればスキップされる。
+`profiles` / `experiences` / `experience_areas` / `experience_event_types` / `experience_responsibilities` / `accounts` が見え、`profiles` に `account_id` があればよい。SQL は `IF NOT EXISTS` なので、同じファイルを再度流しても表や列が既にあればスキップされる。
+
+シードの `tarou` は `account_id` を付けない（開発用ダミーのまま）。Google ログイン実装後に本物の Account と紐づける。
 
 ### ダミーデータを入れる（シード）
 
-migration のあと、公開プロフィール用のダミー（`tarou`）を入れる。公開 API はこのシードを読む。
+`001`（と任意で `003`）のあと、公開プロフィール用のダミー（`tarou`）を入れる。公開 API はこのシードを読む。
 
 ```bash
 cd backend
