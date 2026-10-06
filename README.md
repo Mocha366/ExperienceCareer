@@ -15,7 +15,7 @@
 
 ## PostgreSQL（ローカル）
 
-`backend/` の Docker Compose で Postgres を起動する。いまの公開 API はまだメモリ上のダミーを読む。Go からの接続やシードは別 issue。
+`backend/` の Docker Compose で Postgres を起動する。いまの公開 API はまだメモリ上のダミーを読む。Go からの接続は別 issue。
 
 初回だけ環境変数ファイルを用意する（`.env` はコミットしない）。
 
@@ -43,7 +43,7 @@ docker compose exec db psql -U experience -d experience -c 'SELECT 1'
 
 ### テーブルを作る（migration）
 
-DB 起動後、SQL を流して Profile / Experience 用の表を作る（シードや Go 接続は別）。
+DB 起動後、SQL を流して Profile / Experience 用の表を作る（Go 接続は別）。
 
 ```bash
 cd backend
@@ -58,6 +58,25 @@ docker compose exec db psql -U experience -d experience -c '\dt'
 ```
 
 `profiles` / `experiences` / `experience_areas` / `experience_event_types` / `experience_responsibilities` が見えればよい。SQL は `IF NOT EXISTS` なので、同じファイルを再度流しても表が既にあればスキップされる。
+
+### ダミーデータを入れる（シード）
+
+migration のあと、公開プロフィール用のダミー（`tarou`）を入れる。公開 API はまだメモリを読む。
+
+```bash
+cd backend
+docker compose exec -T db psql -U experience -d experience < migrations/002_seed_tarou.sql
+```
+
+確認:
+
+```bash
+cd backend
+docker compose exec db psql -U experience -d experience -c "SELECT username, name FROM profiles;"
+docker compose exec db psql -U experience -d experience -c "SELECT id, title FROM experiences;"
+```
+
+`tarou` と経験 3 件が見えればよい。SQL 先頭で同じ username を消してから入れ直すので、何度流してもよい。
 
 止める（データは volume に残る）:
 
