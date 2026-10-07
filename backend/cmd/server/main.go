@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/Mocha366/ExperienceCareer/backend/internal/auth"
 	"github.com/Mocha366/ExperienceCareer/backend/internal/infrastructure/memory"
@@ -30,9 +31,14 @@ func main() {
 		log.Fatal(err)
 	}
 
+	frontendOrigin := os.Getenv("FRONTEND_ORIGIN")
+	if frontendOrigin == "" {
+		log.Fatal("FRONTEND_ORIGIN is required")
+	}
+
 	accountRepo := postgres.NewAccountRepository(db)
 	sessions := memory.NewSessionStore()
-	authHandler := httpapi.NewAuthHandler(google, accountRepo, sessions)
+	authHandler := httpapi.NewAuthHandler(google, accountRepo, sessions, frontendOrigin)
 
 	profileRepo := postgres.NewProfileRepository(db)
 	getPublicProfile := usecase.NewGetPublicProfile(profileRepo)
