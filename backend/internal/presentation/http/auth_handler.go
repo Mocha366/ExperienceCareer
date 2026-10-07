@@ -23,9 +23,10 @@ const (
 )
 
 type AuthHandler struct {
-	google   *auth.Google
-	accounts *postgres.AccountRepository
-	sessions *memory.SessionStore
+	google         *auth.Google
+	accounts       *postgres.AccountRepository
+	sessions       *memory.SessionStore
+	frontendOrigin string
 
 	statesMu sync.Mutex
 	states   map[string]time.Time
@@ -35,12 +36,14 @@ func NewAuthHandler(
 	google *auth.Google,
 	accounts *postgres.AccountRepository,
 	sessions *memory.SessionStore,
+	frontendOrigin string,
 ) *AuthHandler {
 	return &AuthHandler{
-		google:   google,
-		accounts: accounts,
-		sessions: sessions,
-		states:   make(map[string]time.Time),
+		google:         google,
+		accounts:       accounts,
+		sessions:       sessions,
+		frontendOrigin: strings.TrimRight(frontendOrigin, "/"),
+		states:         make(map[string]time.Time),
 	}
 }
 
@@ -133,7 +136,11 @@ func (h *AuthHandler) GoogleCallback(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteLaxMode,
 	})
 
-	http.Redirect(w, r, "/api/me", http.StatusFound)
+	afterLogin := h.frontendOrigin + "/me"
+	if h.frontendOrigin == "" {
+		afterLogin = "/api/me"
+	}
+	http.Redirect(w, r, afterLogin, http.StatusFound)
 }
 
 func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
