@@ -24,7 +24,7 @@ cd backend
 cp .env.example .env
 ```
 
-必要なら `.env` のユーザ / パスワード / DB 名 / ポートを変える。Google ログイン用の `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` / `GOOGLE_REDIRECT_URL` も `.env` に書く（値は Google Cloud の OAuth クライアントから。`.env` はコミットしない）。変数の意味は `.env.example` を見る。ホスト側のポートはデフォルト **5433**（Mac で 5432 が既存 Postgres に使われていることが多いため）。Go などホストからつなぐときは `localhost:5433`。
+必要なら `.env` のユーザ / パスワード / DB 名 / ポートを変える。Google ログイン用の `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` / `GOOGLE_REDIRECT_URL` も `.env` に書く（値は Google Cloud の OAuth クライアントから。`.env` はコミットしない）。ログイン後の戻り先用に `FRONTEND_ORIGIN`（ローカルは `http://localhost:5173`）も必須。変数の意味は `.env.example` を見る。ホスト側のポートはデフォルト **5433**（Mac で 5432 が既存 Postgres に使われていることが多いため）。Go などホストからつなぐときは `localhost:5433`。
 
 起動（いつも `backend/` で実行する）:
 
@@ -148,7 +148,7 @@ curl -i http://localhost:8080/api/profiles/nobody
 
 ### Google ログイン（ローカル）
 
-学校ドメイン（`@gn.iwasaki.ac.jp`）の Google アカウントだけでログインできる。セッションはサーバのメモリ（再起動で消える）。公開プロフィールはログイン不要のまま。
+学校ドメイン（`@gn.iwasaki.ac.jp`）の Google アカウントだけでログインできる。セッションはサーバのメモリ（再起動で消える）。公開プロフィールはログイン不要のまま。ログイン後はフロントの `/me`（ダッシュボード）に戻る。
 
 1. [Google Cloud Console](https://console.cloud.google.com/) でプロジェクトを用意する  
 2. OAuth 同意画面を設定する（テスト中ならテストユーザに自分の学校メールを追加）  
@@ -156,22 +156,35 @@ curl -i http://localhost:8080/api/profiles/nobody
 
    `http://localhost:8080/api/auth/google/callback`
 
-4. Client ID / Client Secret を `backend/.env` に書く（`.env.example` のキー名に合わせる）。`GOOGLE_REDIRECT_URL` は上の URI と一字一句同じにする  
+4. Client ID / Client Secret を `backend/.env` に書く（`.env.example` のキー名に合わせる）。`GOOGLE_REDIRECT_URL` は上の URI と一字一句同じにする。`FRONTEND_ORIGIN=http://localhost:5173` も書く（無いとサーバは起動しない）  
 5. migration `003` まで流しておく（`accounts` 表）  
-6. `cd backend` → `go run ./cmd/server`  
+6. バックエンドとフロントを両方起動する  
+
+```bash
+# ターミナル A
+cd backend
+go run ./cmd/server
+
+# ターミナル B
+cd frontend
+npm run dev
+```
+
 7. ブラウザで次を開く  
 
 ```text
-http://localhost:8080/api/auth/google
+http://localhost:5173/login
 ```
 
-成功すると `/api/me` にリダイレクトされ、`id` と `email` の JSON が返る。ログアウト:
+「Google でログイン」→ 学校 Google → `/me`（ダッシュボード）に戻り email が表示されればよい。「ログアウト」すると `/login` に戻る。未ログインで `/me` を開くと `/login` へ誘導される。
 
-```bash
-curl -i -X POST http://localhost:8080/api/auth/logout -b /tmp/ec-cookies.txt -c /tmp/ec-cookies.txt
+公開プロフィール（ログイン不要）の確認:
+
+```text
+http://localhost:5173/tarou
 ```
 
-（ブラウザで試す場合は開発者ツールで Cookie `ec_session` を消すか、logout を叩いたあと `/api/me` が 401 になることを確認する。）
+API だけ試す場合のログイン開始 URL は `http://localhost:8080/api/auth/google`（成功後は `FRONTEND_ORIGIN/me` へ飛ぶ）。
 
 止めるときは、サーバを動かしているターミナルで `Ctrl+C`。
 
@@ -209,6 +222,8 @@ gofmt -w .
 3. ブラウザで次を開く:
    - `http://localhost:5173/tarou` … DB の公開プロフィール（シードの Username）
    - `http://localhost:5173/nobody` … プロフィールが見つからない表示
+   - `http://localhost:5173/login` … ログイン
+   - `http://localhost:5173/me` … ダッシュボード（要ログイン。email / ログアウト）
    - `http://localhost:5173/` … いまは `/tarou` にリダイレクト（デモ用）
 
 API だけ確認する場合は、バックエンド起動後に上記「バックエンド」の `curl` を使う。フロント経由では `curl -i http://localhost:5173/api/profiles/tarou` でも同じ JSON が返る（proxy 経由）。
