@@ -24,7 +24,7 @@ cd backend
 cp .env.example .env
 ```
 
-必要なら `.env` のユーザ / パスワード / DB 名 / ポートを変える。変数の意味は `.env.example` を見る。ホスト側のポートはデフォルト **5433**（Mac で 5432 が既存 Postgres に使われていることが多いため）。Go などホストからつなぐときは `localhost:5433`。
+必要なら `.env` のユーザ / パスワード / DB 名 / ポートを変える。Google ログイン用の `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` / `GOOGLE_REDIRECT_URL` も `.env` に書く（値は Google Cloud の OAuth クライアントから。`.env` はコミットしない）。変数の意味は `.env.example` を見る。ホスト側のポートはデフォルト **5433**（Mac で 5432 が既存 Postgres に使われていることが多いため）。Go などホストからつなぐときは `localhost:5433`。
 
 起動（いつも `backend/` で実行する）:
 
@@ -126,7 +126,7 @@ npm run fmt
 
 ## バックエンド
 
-API サーバを起動する。**先に Postgres を起動しておく**（上の「PostgreSQL（ローカル）」）。起動時に DB へ接続し、失敗したらサーバは起動しない。接続に使う値は環境変数 `POSTGRES_*`（未設定なら `.env.example` と同じデフォルト。ポートは 5433）。
+API サーバを起動する。**先に Postgres を起動しておく**（上の「PostgreSQL（ローカル）」）。起動時に DB へ接続し、失敗したらサーバは起動しない。接続に使う値は環境変数 `POSTGRES_*`（未設定なら `.env.example` と同じデフォルト。ポートは 5433）。`go run` は **`backend/` で実行**する（同じディレクトリの `.env` を読む）。
 
 ```bash
 cd backend
@@ -134,7 +134,7 @@ docker compose up -d
 go run ./cmd/server
 ```
 
-ログに `connected to postgres` と `listening on http://localhost:8080` が出ればよい。
+ログに `connected to postgres` と `listening on http://localhost:8080` が出ればよい。Google 用の環境変数が無いと起動に失敗する。
 
 別のターミナルで確認する。
 
@@ -145,6 +145,33 @@ curl -i http://localhost:8080/api/profiles/tarou
 # 存在しないユーザー → 404
 curl -i http://localhost:8080/api/profiles/nobody
 ```
+
+### Google ログイン（ローカル）
+
+学校ドメイン（`@gn.iwasaki.ac.jp`）の Google アカウントだけでログインできる。セッションはサーバのメモリ（再起動で消える）。公開プロフィールはログイン不要のまま。
+
+1. [Google Cloud Console](https://console.cloud.google.com/) でプロジェクトを用意する  
+2. OAuth 同意画面を設定する（テスト中ならテストユーザに自分の学校メールを追加）  
+3. OAuth クライアント ID を **ウェブアプリケーション** で作成し、承認済みリダイレクト URI に次を登録する  
+
+   `http://localhost:8080/api/auth/google/callback`
+
+4. Client ID / Client Secret を `backend/.env` に書く（`.env.example` のキー名に合わせる）。`GOOGLE_REDIRECT_URL` は上の URI と一字一句同じにする  
+5. migration `003` まで流しておく（`accounts` 表）  
+6. `cd backend` → `go run ./cmd/server`  
+7. ブラウザで次を開く  
+
+```text
+http://localhost:8080/api/auth/google
+```
+
+成功すると `/api/me` にリダイレクトされ、`id` と `email` の JSON が返る。ログアウト:
+
+```bash
+curl -i -X POST http://localhost:8080/api/auth/logout -b /tmp/ec-cookies.txt -c /tmp/ec-cookies.txt
+```
+
+（ブラウザで試す場合は開発者ツールで Cookie `ec_session` を消すか、logout を叩いたあと `/api/me` が 401 になることを確認する。）
 
 止めるときは、サーバを動かしているターミナルで `Ctrl+C`。
 
