@@ -290,6 +290,48 @@ func (h *AuthHandler) UpdateUsername(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func (h *AuthHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
+	account, ok := h.currentAccount(r)
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	var body struct {
+		Name       string `json:"name"`
+		School     string `json:"school"`
+		Department string `json:"department"`
+		Bio        string `json:"bio"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
+
+	name := strings.TrimSpace(body.Name)
+	school := strings.TrimSpace(body.School)
+	department := strings.TrimSpace(body.Department)
+	bio := strings.TrimSpace(body.Bio)
+
+	err := h.profiles.UpdateProfile(account.ID, name, school, department, bio)
+	if errors.Is(err, postgres.ErrProfileNotFound) {
+		http.Error(w, "not found", http.StatusNotFound)
+		return
+	}
+	if err != nil {
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	_ = json.NewEncoder(w).Encode(map[string]string{
+		"name":       name,
+		"school":     school,
+		"department": department,
+		"bio":        bio,
+	})
+}
+
 func (h *AuthHandler) currentAccount(r *http.Request) (domain.Account, bool) {
 	c, err := r.Cookie(sessionCookieName)
 	if err != nil {
