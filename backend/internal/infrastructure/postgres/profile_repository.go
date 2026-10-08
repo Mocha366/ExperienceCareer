@@ -2,10 +2,13 @@ package postgres
 
 import (
 	"database/sql"
+	"errors"
+	"fmt"
 	"strconv"
 	"time"
 
 	"github.com/Mocha366/ExperienceCareer/backend/internal/domain"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 type ProfileRepository struct {
@@ -182,4 +185,73 @@ func (r *ProfileRepository) findResponsibilities(experienceID int64) ([]string, 
 		bodies = append(bodies, body)
 	}
 	return bodies, rows.Err()
+}
+
+var (
+	ErrUsernameTaken   = errors.New("username taken")
+	ErrProfileNotFound = errors.New("profile not found")
+	ErrProfileExists   = errors.New("profile already exists")
+)
+
+func (r *ProfileRepository) FindByAccountID(accountID int64) (domain.Profile, bool) {
+	var profile domain.Profile
+	err := r.db.QueryRow(
+		`SELECT username, name, school, department, bio
+		FROM profiles
+		WHERE account_id = $1`,
+		accountID,
+	).Scan(
+		&profile.Username,
+		&profile.Name,
+		&profile.School,
+		&profile.Department,
+		&profile.Bio,
+	)
+	if err != nil {
+		return domain.Profile{}, false
+	}
+	return profile, true
+}
+
+func (r *ProfileRepository) CreateForAccount(accountID int64, username, name, school, department, bio string) error {
+	_, err := r.db.Exec(
+		`INSERT INTO profiles (username, name, school, department, bio, account_id)
+		VALUES ($1, $2, $3, $4, $5, $6)`,
+		username, name, school, department, bio, accountID,
+	)
+	if err == nil {
+		return nil
+	}
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+		if pgErr.ConstraintName == "profiles_account_id_key" {
+			return ErrProfileExists
+		}
+		return ErrUsernameTaken
+	}
+	return fmt.Errorf("create profile: %w", err)
+}
+
+func (r *ProfileRepository) UpdateUsername(accountID int64, username string) error {
+	res, err := r.db.Exec(
+		`UPDATE profiles
+		SET username = $1, updated_at = now()
+		WHERE account_id = $2`,
+		username, accountID,
+	)
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			return ErrUsernameTaken
+		}
+		return fmt.Errorf("update username: %w", err)
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("update username: %w", err)
+	}
+	if n == 0 {
+		return ErrProfileNotFound
+	}
+	return nil
 }
