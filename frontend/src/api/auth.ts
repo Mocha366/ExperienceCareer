@@ -1,6 +1,7 @@
 export type Me = {
   id: number;
   email: string;
+  username: string | null;
 };
 
 export async function fetchMe(): Promise<Me | null> {
@@ -14,6 +15,44 @@ export async function fetchMe(): Promise<Me | null> {
     throw new Error("failed to fetch me");
   }
   return res.json();
+}
+
+export type CreateProfileInput = {
+  username: string;
+  name: string;
+  school: string;
+  department: string;
+  bio: string;
+};
+
+export async function createProfile(input: CreateProfileInput): Promise<void> {
+  const res = await fetch("/api/me/profile", {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  if (res.status === 409) {
+    throw new Error("conflict");
+  }
+  if (!res.ok) {
+    throw new Error("failed to create profile");
+  }
+}
+
+export async function updateUsername(username: string): Promise<void> {
+  const res = await fetch("/api/me/username", {
+    method: "PATCH",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username }),
+  });
+  if (res.status === 409) {
+    throw new Error("conflict");
+  }
+  if (!res.ok) {
+    throw new Error("failed to update username");
+  }
 }
 
 export async function logout(): Promise<void> {
