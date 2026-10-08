@@ -255,3 +255,23 @@ func (r *ProfileRepository) UpdateUsername(accountID int64, username string) err
 	}
 	return nil
 }
+
+func (r *ProfileRepository) UpdateProfile(accountID int64, name, school, department, bio string) error {
+	res, err := r.db.Exec(
+		`UPDATE profiles
+		SET name = $1, school = $2, department = $3, bio = $4, updated_at = now()
+		WHERE account_id = $5`,
+		name, school, department, bio, accountID,
+	)
+	if err != nil {
+		return fmt.Errorf("update profile: %w", err)
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("update profile: %w", err)
+	}
+	if n == 0 {
+		return ErrProfileNotFound
+	}
+	return nil
+}

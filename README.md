@@ -186,6 +186,17 @@ http://localhost:5173/tarou
 
 API だけ試す場合のログイン開始 URL は `http://localhost:8080/api/auth/google`（成功後は `FRONTEND_ORIGIN/me` へ飛ぶ）。
 
+自分のプロフィール（名前・学校・学科・自己紹介）は `PATCH /api/me/profile` で更新する。Username は変えない。未ログインは 401、プロフィールがまだ無いときは 404。空欄も保存でき、公開ページでは空の学校・学科・自己紹介は出ない。
+
+```bash
+# 未ログイン → 401
+curl -i -X PATCH http://localhost:8080/api/me/profile \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"山田","school":"岩崎学園","department":"","bio":""}'
+```
+
+ログイン中に更新するときは、ブラウザの `ec_session` Cookie を付けて同じ URL を叩く。成功は 200。その後 `GET /api/profiles/自分のusername` に、送った名前・学校・学科・自己紹介が出る。
+
 止めるときは、サーバを動かしているターミナルで `Ctrl+C`。
 
 変更を出す前に、CI と同じチェックをローカルで通す（必ず `backend/` で実行する）。
