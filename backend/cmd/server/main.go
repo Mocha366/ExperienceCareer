@@ -38,9 +38,9 @@ func main() {
 
 	accountRepo := postgres.NewAccountRepository(db)
 	sessions := memory.NewSessionStore()
-	authHandler := httpapi.NewAuthHandler(google, accountRepo, sessions, frontendOrigin)
-
 	profileRepo := postgres.NewProfileRepository(db)
+	authHandler := httpapi.NewAuthHandler(google, accountRepo, sessions, profileRepo, frontendOrigin)
+
 	getPublicProfile := usecase.NewGetPublicProfile(profileRepo)
 	profileHandler := httpapi.NewProfileHandler(getPublicProfile)
 

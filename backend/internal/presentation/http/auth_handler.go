@@ -4,7 +4,9 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"net/http"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -12,6 +14,7 @@ import (
 	"golang.org/x/oauth2"
 
 	"github.com/Mocha366/ExperienceCareer/backend/internal/auth"
+	"github.com/Mocha366/ExperienceCareer/backend/internal/domain"
 	"github.com/Mocha366/ExperienceCareer/backend/internal/infrastructure/memory"
 	"github.com/Mocha366/ExperienceCareer/backend/internal/infrastructure/postgres"
 )
@@ -26,6 +29,7 @@ type AuthHandler struct {
 	google         *auth.Google
 	accounts       *postgres.AccountRepository
 	sessions       *memory.SessionStore
+	profiles       *postgres.ProfileRepository
 	frontendOrigin string
 
 	statesMu sync.Mutex
@@ -36,12 +40,14 @@ func NewAuthHandler(
 	google *auth.Google,
 	accounts *postgres.AccountRepository,
 	sessions *memory.SessionStore,
+	profiles *postgres.ProfileRepository,
 	frontendOrigin string,
 ) *AuthHandler {
 	return &AuthHandler{
 		google:         google,
 		accounts:       accounts,
 		sessions:       sessions,
+		profiles:       profiles,
 		frontendOrigin: strings.TrimRight(frontendOrigin, "/"),
 		states:         make(map[string]time.Time),
 	}
@@ -178,11 +184,122 @@ func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var username *string
+	if profile, ok := h.profiles.FindByAccountID(account.ID); ok {
+		username = &profile.Username
+	}
+
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	_ = json.NewEncoder(w).Encode(map[string]any{
-		"id":    account.ID,
-		"email": account.Email,
+		"id":       account.ID,
+		"email":    account.Email,
+		"username": username,
 	})
+}
+
+var usernamePattern = regexp.MustCompile(`^[a-z0-9]+$`)
+
+func (h *AuthHandler) CreateProfile(w http.ResponseWriter, r *http.Request) {
+	account, ok := h.currentAccount(r)
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	var body struct {
+		Username   string `json:"username"`
+		Name       string `json:"name"`
+		School     string `json:"school"`
+		Department string `json:"department"`
+		Bio        string `json:"bio"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
+
+	body.Username = strings.TrimSpace(body.Username)
+	body.Name = strings.TrimSpace(body.Name)
+	if body.Name == "" || !usernamePattern.MatchString(body.Username) {
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
+
+	err := h.profiles.CreateForAccount(
+		account.ID,
+		body.Username,
+		body.Name,
+		strings.TrimSpace(body.School),
+		strings.TrimSpace(body.Department),
+		strings.TrimSpace(body.Bio),
+	)
+	if errors.Is(err, postgres.ErrUsernameTaken) || errors.Is(err, postgres.ErrProfileExists) {
+		http.Error(w, "conflict", http.StatusConflict)
+		return
+	}
+	if err != nil {
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(http.StatusCreated)
+	_ = json.NewEncoder(w).Encode(map[string]string{
+		"username": body.Username,
+	})
+}
+
+func (h *AuthHandler) UpdateUsername(w http.ResponseWriter, r *http.Request) {
+	account, ok := h.currentAccount(r)
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	var body struct {
+		Username string `json:"username"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
+
+	body.Username = strings.TrimSpace(body.Username)
+	if !usernamePattern.MatchString(body.Username) {
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
+
+	err := h.profiles.UpdateUsername(account.ID, body.Username)
+	if errors.Is(err, postgres.ErrUsernameTaken) {
+		http.Error(w, "conflict", http.StatusConflict)
+		return
+	}
+	if errors.Is(err, postgres.ErrProfileNotFound) {
+		http.Error(w, "not found", http.StatusNotFound)
+		return
+	}
+	if err != nil {
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	_ = json.NewEncoder(w).Encode(map[string]string{
+		"username": body.Username,
+	})
+}
+
+func (h *AuthHandler) currentAccount(r *http.Request) (domain.Account, bool) {
+	c, err := r.Cookie(sessionCookieName)
+	if err != nil {
+		return domain.Account{}, false
+	}
+	accountID, ok := h.sessions.Get(c.Value)
+	if !ok {
+		return domain.Account{}, false
+	}
+	return h.accounts.FindByID(accountID)
 }
 
 func (h *AuthHandler) consumeState(state string) bool {

@@ -176,7 +176,7 @@ npm run dev
 http://localhost:5173/login
 ```
 
-「Google でログイン」→ 学校 Google → `/me`（ダッシュボード）に戻り email が表示されればよい。「ログアウト」すると `/login` に戻る。未ログインで `/me` を開くと `/login` へ誘導される。
+「Google でログイン」→ 学校 Google → Username が未設定なら `/onboarding` に飛ぶ。Username・名前・学校・学科・自己紹介を保存すると、自分の公開ページ（`/設定したusername`）へ行く。`/me` には email、公開ページへのリンク、Username 変更、ログアウトがある。Username を変えたあと、旧 URL は 404 になる。未ログインで `/me` を開くと `/login` へ誘導される。
 
 公開プロフィール（ログイン不要）の確認:
 
@@ -223,7 +223,8 @@ gofmt -w .
    - `http://localhost:5173/tarou` … DB の公開プロフィール（シードの Username）
    - `http://localhost:5173/nobody` … プロフィールが見つからない表示
    - `http://localhost:5173/login` … ログイン
-   - `http://localhost:5173/me` … ダッシュボード（要ログイン。email / ログアウト）
+   - `http://localhost:5173/onboarding` … 初回のプロフィール作成（要ログイン。Username 設定済みなら `/me` へ）
+   - `http://localhost:5173/me` … ダッシュボード（要ログイン。公開ページへのリンク / Username 変更 / ログアウト）
    - `http://localhost:5173/` … いまは `/tarou` にリダイレクト（デモ用）
 
 API だけ確認する場合は、バックエンド起動後に上記「バックエンド」の `curl` を使う。フロント経由では `curl -i http://localhost:5173/api/profiles/tarou` でも同じ JSON が返る（proxy 経由）。
