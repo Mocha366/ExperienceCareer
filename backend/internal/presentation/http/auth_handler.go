@@ -142,9 +142,9 @@ func (h *AuthHandler) GoogleCallback(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteLaxMode,
 	})
 
-	afterLogin := h.frontendOrigin + "/me"
+	afterLogin := h.frontendOrigin + "/dashboard"
 	if h.frontendOrigin == "" {
-		afterLogin = "/api/me"
+		afterLogin = "/api/dashboard"
 	}
 	http.Redirect(w, r, afterLogin, http.StatusFound)
 }

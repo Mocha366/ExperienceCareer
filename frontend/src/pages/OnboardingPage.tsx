@@ -42,7 +42,7 @@ export function OnboardingPage() {
     return <Navigate to="/login" replace />;
   }
   if (status === "authed") {
-    return <Navigate to="/me" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   return (
