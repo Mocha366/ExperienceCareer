@@ -148,7 +148,7 @@ curl -i http://localhost:8080/api/profiles/nobody
 
 ### Google ログイン（ローカル）
 
-学校ドメイン（`@gn.iwasaki.ac.jp`）の Google アカウントだけでログインできる。セッションはサーバのメモリ（再起動で消える）。公開プロフィールはログイン不要のまま。ログイン後はフロントの `/me`（ダッシュボード）に戻る。
+学校ドメイン（`@gn.iwasaki.ac.jp`）の Google アカウントだけでログインできる。セッションはサーバのメモリ（再起動で消える）。公開プロフィールはログイン不要のまま。ログイン後はフロントの `/dashboard`（ダッシュボード）に戻る。
 
 1. [Google Cloud Console](https://console.cloud.google.com/) でプロジェクトを用意する  
 2. OAuth 同意画面を設定する（テスト中ならテストユーザに自分の学校メールを追加）  
@@ -176,7 +176,7 @@ npm run dev
 http://localhost:5173/login
 ```
 
-「Google でログイン」→ 学校 Google → Username が未設定なら `/onboarding` に飛ぶ。Username・名前・学校・学科・自己紹介を保存すると、自分の公開ページ（`/設定したusername`）へ行く。`/me` には email、公開ページへのリンク、Username 変更、ログアウトがある。Username を変えたあと、旧 URL は 404 になる。未ログインで `/me` を開くと `/login` へ誘導される。
+「Google でログイン」→ 学校 Google → Username が未設定なら `/onboarding` に飛ぶ。Username・名前・学校・学科・自己紹介を保存すると、自分の公開ページ（`/設定したusername`）へ行く。`/dashboard` には email、公開ページへのリンク、ログアウトがある。Username・名前・学校・学科・自己紹介の変更は、ログイン中に公開ページのヘッダーから行う。Username を変えたあと、旧 URL は 404 になる。未ログインで `/dashboard` を開くと `/login` へ誘導される。
 
 公開プロフィール（ログイン不要）の確認:
 
@@ -184,7 +184,7 @@ http://localhost:5173/login
 http://localhost:5173/tarou
 ```
 
-API だけ試す場合のログイン開始 URL は `http://localhost:8080/api/auth/google`（成功後は `FRONTEND_ORIGIN/me` へ飛ぶ）。
+API だけ試す場合のログイン開始 URL は `http://localhost:8080/api/auth/google`（成功後は `FRONTEND_ORIGIN/dashboard` へ飛ぶ）。
 
 自分のプロフィール（名前・学校・学科・自己紹介）は `PATCH /api/me/profile` で更新する。Username は変えない。未ログインは 401、プロフィールがまだ無いときは 404。空欄も保存でき、公開ページでは空の学校・学科・自己紹介は出ない。
 
@@ -234,8 +234,8 @@ gofmt -w .
    - `http://localhost:5173/tarou` … DB の公開プロフィール（シードの Username）
    - `http://localhost:5173/nobody` … プロフィールが見つからない表示
    - `http://localhost:5173/login` … ログイン
-   - `http://localhost:5173/onboarding` … 初回のプロフィール作成（要ログイン。Username 設定済みなら `/me` へ）
-   - `http://localhost:5173/me` … ダッシュボード（要ログイン。公開ページへのリンク / Username 変更 / ログアウト）
+   - `http://localhost:5173/onboarding` … 初回のプロフィール作成（要ログイン。Username 設定済みなら `/dashboard` へ）
+   - `http://localhost:5173/dashboard` … ダッシュボード（要ログイン。公開ページへのリンク / ログアウト）
    - `http://localhost:5173/` … いまは `/tarou` にリダイレクト（デモ用）
 
 API だけ確認する場合は、バックエンド起動後に上記「バックエンド」の `curl` を使う。フロント経由では `curl -i http://localhost:5173/api/profiles/tarou` でも同じ JSON が返る（proxy 経由）。
