@@ -81,28 +81,31 @@ export function ProfileEditModal({ onClose, onSaved }: Props) {
               />
             </label>
             <label className="block text-sm">
-              名前
-              <input
-                className="mt-1 w-full border border-[#e6e1d8] bg-white px-3 py-2"
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-              />
+            名前
+            <input
+              className="mt-1 w-full border border-[#e6e1d8] bg-white px-3 py-2"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              required
+            />
             </label>
             <label className="block text-sm">
-              学校
-              <input
-                className="mt-1 w-full border border-[#e6e1d8] bg-white px-3 py-2"
-                value={school}
-                onChange={(event) => setSchool(event.target.value)}
-              />
+            学校
+            <input
+              className="mt-1 w-full border border-[#e6e1d8] bg-white px-3 py-2"
+              value={school}
+              onChange={(event) => setSchool(event.target.value)}
+              required
+            />
             </label>
             <label className="block text-sm">
-              学科
-              <input
-                className="mt-1 w-full border border-[#e6e1d8] bg-white px-3 py-2"
-                value={department}
-                onChange={(event) => setDepartment(event.target.value)}
-              />
+            学科
+            <input
+              className="mt-1 w-full border border-[#e6e1d8] bg-white px-3 py-2"
+              value={department}
+              onChange={(event) => setDepartment(event.target.value)}
+              required
+            />
             </label>
             <label className="block text-sm">
               自己紹介

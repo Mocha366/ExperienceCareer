@@ -220,7 +220,9 @@ func (h *AuthHandler) CreateProfile(w http.ResponseWriter, r *http.Request) {
 
 	body.Username = strings.TrimSpace(body.Username)
 	body.Name = strings.TrimSpace(body.Name)
-	if body.Name == "" || !usernamePattern.MatchString(body.Username) {
+	body.School = strings.TrimSpace(body.School)
+	body.Department = strings.TrimSpace(body.Department)
+	if body.Name == "" || body.School == "" || body.Department == "" || !usernamePattern.MatchString(body.Username) {
 		http.Error(w, "bad request", http.StatusBadRequest)
 		return
 	}
@@ -229,8 +231,8 @@ func (h *AuthHandler) CreateProfile(w http.ResponseWriter, r *http.Request) {
 		account.ID,
 		body.Username,
 		body.Name,
-		strings.TrimSpace(body.School),
-		strings.TrimSpace(body.Department),
+		body.School,
+		body.Department,
 		strings.TrimSpace(body.Bio),
 	)
 	if errors.Is(err, postgres.ErrUsernameTaken) || errors.Is(err, postgres.ErrProfileExists) {
@@ -312,6 +314,10 @@ func (h *AuthHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 	school := strings.TrimSpace(body.School)
 	department := strings.TrimSpace(body.Department)
 	bio := strings.TrimSpace(body.Bio)
+	if name == "" || school == "" || department == "" {
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
 
 	err := h.profiles.UpdateProfile(account.ID, name, school, department, bio)
 	if errors.Is(err, postgres.ErrProfileNotFound) {

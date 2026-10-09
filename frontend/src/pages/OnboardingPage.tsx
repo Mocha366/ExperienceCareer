@@ -75,6 +75,7 @@ export function OnboardingPage() {
               className="mt-1 w-full border border-[#e6e1d8] bg-white px-3 py-2"
               value={school}
               onChange={(event) => setSchool(event.target.value)}
+              required
             />
           </label>
           <label className="block text-sm">
@@ -83,6 +84,7 @@ export function OnboardingPage() {
               className="mt-1 w-full border border-[#e6e1d8] bg-white px-3 py-2"
               value={department}
               onChange={(event) => setDepartment(event.target.value)}
+              required
             />
           </label>
           <label className="block text-sm">
