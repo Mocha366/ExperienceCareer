@@ -8,7 +8,7 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/tarou" replace />} />
-      <Route path="/me" element={<DashboardPage />} />
+      <Route path="/dashboard" element={<DashboardPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/onboarding" element={<OnboardingPage />} />
       <Route path="/:username" element={<PublicProfilePage />} />

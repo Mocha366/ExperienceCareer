@@ -1,12 +1,10 @@
-import { useEffect, useState, type SubmitEvent } from "react";
+import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
-import { fetchMe, logout, updateUsername, type Me } from "../api/auth";
+import { fetchMe, logout, type Me } from "../api/auth";
 
 export function DashboardPage() {
   const [me, setMe] = useState<Me | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
-  const [nextUsername, setNextUsername] = useState("");
-  const [formError, setFormError] = useState("");
 
   const load = () => {
     setStatus("loading");
@@ -29,21 +27,6 @@ export function DashboardPage() {
     logout()
       .then(() => load())
       .catch(() => setStatus("error"));
-  };
-
-  const onChangeUsername = (event: SubmitEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setFormError("");
-    updateUsername(nextUsername)
-      .then(() => {
-        setNextUsername("");
-        load();
-      })
-      .catch((err: Error) => {
-        setFormError(
-          err.message === "conflict" ? "この Username は使えません" : "変更に失敗しました",
-        );
-      });
   };
 
   if (status === "loading") {
@@ -80,21 +63,6 @@ export function DashboardPage() {
         <p>
           公開ページ: <Link to={`/${me.username}`}>/{me.username}</Link>
         </p>
-        <form className="space-y-2" onSubmit={onChangeUsername}>
-          <label className="block text-sm">
-            Username を変更
-            <input
-              className="mt-1 w-full max-w-md border border-[#e6e1d8] bg-white px-3 py-2"
-              value={nextUsername}
-              onChange={(event) => setNextUsername(event.target.value)}
-              required
-            />
-          </label>
-          {formError && <p className="text-sm">{formError}</p>}
-          <button type="submit" className="border border-[#e6e1d8] px-4 py-2 text-sm">
-            変更する
-          </button>
-        </form>
         <button
           type="button"
           className="border border-[#e6e1d8] px-4 py-2 text-sm"

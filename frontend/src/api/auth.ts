@@ -40,6 +40,28 @@ export async function createProfile(input: CreateProfileInput): Promise<void> {
   }
 }
 
+export type UpdateProfileInput = {
+  name: string;
+  school: string;
+  department: string;
+  bio: string;
+};
+
+export async function updateProfile(input: UpdateProfileInput): Promise<void> {
+  const res = await fetch("/api/me/profile", {
+    method: "PATCH",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  if (res.status === 404) {
+    throw new Error("not found");
+  }
+  if (!res.ok) {
+    throw new Error("failed to update profile");
+  }
+}
+
 export async function updateUsername(username: string): Promise<void> {
   const res = await fetch("/api/me/username", {
     method: "PATCH",
