@@ -7,11 +7,11 @@ import { PublicProfilePage } from "./pages/PublicProfilePage";
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/tarou" replace />} />
+      <Route path="/" element={<Navigate to="/public/tarou" replace />} />
       <Route path="/dashboard" element={<DashboardPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/onboarding" element={<OnboardingPage />} />
-      <Route path="/:username" element={<PublicProfilePage />} />
+      <Route path="/public/:username" element={<PublicProfilePage />} />
     </Routes>
   );
 }

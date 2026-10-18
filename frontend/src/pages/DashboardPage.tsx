@@ -61,7 +61,7 @@ export function DashboardPage() {
       <div className="mt-8 space-y-4">
         <p>{me.email}</p>
         <p>
-          公開ページ: <Link to={`/${me.username}`}>/{me.username}</Link>
+          公開ページ: <Link to={`/public/${me.username}`}>/public/{me.username}</Link>
         </p>
         <button
           type="button"

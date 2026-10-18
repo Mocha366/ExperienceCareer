@@ -40,7 +40,7 @@ export function Header({ onSaved }: Props) {
             setOpen(false);
             setMeUsername(nextUsername);
             if (nextUsername !== pageUsername) {
-              navigate(`/${nextUsername}`);
+              navigate(`/public/${nextUsername}`);
               return;
             }
             onSaved();
