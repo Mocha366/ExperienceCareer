@@ -176,12 +176,12 @@ npm run dev
 http://localhost:5173/login
 ```
 
-「Google でログイン」→ 学校 Google → Username が未設定なら `/onboarding` に飛ぶ。Username・名前・学校・学科・自己紹介を保存すると、自分の公開ページ（`/設定したusername`）へ行く。`/dashboard` には email、公開ページへのリンク、ログアウトがある。Username・名前・学校・学科・自己紹介の変更は、ログイン中に公開ページのヘッダーから行う。Username を変えたあと、旧 URL は 404 になる。未ログインで `/dashboard` を開くと `/login` へ誘導される。
+「Google でログイン」→ 学校 Google → Username が未設定なら `/onboarding` に飛ぶ。Username・名前・学校・学科・自己紹介を保存すると、自分の公開ページ（`/public/設定したusername`）へ行く。Username は小文字英字と数字の 3〜25 文字。`/dashboard` には email、公開ページへのリンク、ログアウトがある。Username・名前・学校・学科・自己紹介の変更は、ログイン中に公開ページのヘッダーから行う。Username を変えたあと、旧 URL は 404 になる。未ログインで `/dashboard` を開くと `/login` へ誘導される。
 
 公開プロフィール（ログイン不要）の確認:
 
 ```text
-http://localhost:5173/tarou
+http://localhost:5173/public/tarou
 ```
 
 API だけ試す場合のログイン開始 URL は `http://localhost:8080/api/auth/google`（成功後は `FRONTEND_ORIGIN/dashboard` へ飛ぶ）。
@@ -231,12 +231,12 @@ gofmt -w .
 1. ターミナル A: `cd backend` → `docker compose up -d` →（初回は migration・シード）→ `go run ./cmd/server`（`:8080`）
 2. ターミナル B: `cd frontend` → `npm run dev`（`:5173`）
 3. ブラウザで次を開く:
-   - `http://localhost:5173/tarou` … DB の公開プロフィール（シードの Username）
-   - `http://localhost:5173/nobody` … プロフィールが見つからない表示
+   - `http://localhost:5173/public/tarou` … DB の公開プロフィール（シードの Username）
+   - `http://localhost:5173/public/nobody` … プロフィールが見つからない表示
    - `http://localhost:5173/login` … ログイン
    - `http://localhost:5173/onboarding` … 初回のプロフィール作成（要ログイン。Username 設定済みなら `/dashboard` へ）
    - `http://localhost:5173/dashboard` … ダッシュボード（要ログイン。公開ページへのリンク / ログアウト）
-   - `http://localhost:5173/` … いまは `/tarou` にリダイレクト（デモ用）
+   - `http://localhost:5173/` … いまは `/public/tarou` にリダイレクト（デモ用）
 
 API だけ確認する場合は、バックエンド起動後に上記「バックエンド」の `curl` を使う。フロント経由では `curl -i http://localhost:5173/api/profiles/tarou` でも同じ JSON が返る（proxy 経由）。
 

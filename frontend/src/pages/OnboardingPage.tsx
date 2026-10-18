@@ -1,11 +1,13 @@
 import { useEffect, useState, type SubmitEvent } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { createProfile, fetchMe } from "../api/auth";
+import { usernameError } from "../entities/username";
 
 export function OnboardingPage() {
   const navigate = useNavigate();
   const [status, setStatus] = useState<"loading" | "ready" | "authed" | "guest">("loading");
   const [username, setUsername] = useState("");
+  const [usernameTouched, setUsernameTouched] = useState(false);
   const [name, setName] = useState("");
   const [school, setSchool] = useState("");
   const [department, setDepartment] = useState("");
@@ -31,8 +33,12 @@ export function OnboardingPage() {
   const onSubmit = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError("");
+    if (usernameError(username) !== "") {
+      setUsernameTouched(true);
+      return;
+    }
     createProfile({ username, name, school, department, bio })
-      .then(() => navigate(`/${username}`))
+      .then(() => navigate(`/public/${username}`))
       .catch((err: Error) => {
         setError(err.message === "conflict" ? "この Username は使えません" : "保存に失敗しました");
       });
@@ -56,10 +62,15 @@ export function OnboardingPage() {
             <input
               className="mt-1 w-full border border-[#e6e1d8] bg-white px-3 py-2"
               value={username}
-              onChange={(event) => setUsername(event.target.value)}
-              required
+              onChange={(event) => {
+                setUsername(event.target.value);
+                setUsernameTouched(true);
+              }}
             />
           </label>
+          {usernameTouched && usernameError(username) && (
+            <p className="text-sm font-medium text-red-600">{usernameError(username)}</p>
+          )}
           <label className="block text-sm">
             名前
             <input
@@ -96,7 +107,16 @@ export function OnboardingPage() {
             />
           </label>
           {error && <p className="text-sm">{error}</p>}
-          <button type="submit" className="border border-[#e6e1d8] px-4 py-2 text-sm">
+          <button
+            type="submit"
+            className="border border-[#e6e1d8] px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-40"
+            disabled={
+              usernameError(username) !== "" ||
+              name.trim() === "" ||
+              school.trim() === "" ||
+              department.trim() === ""
+            }
+          >
             保存する
           </button>
         </form>

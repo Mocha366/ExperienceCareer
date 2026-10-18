@@ -1,6 +1,7 @@
 import { useEffect, useState, type SubmitEvent } from "react";
 import { fetchMe, updateProfile, updateUsername } from "../api/auth";
 import { fetchPublicProfile } from "../api/profile";
+import { usernameError } from "../entities/username";
 
 type Props = {
   onClose: () => void;
@@ -11,6 +12,7 @@ export function ProfileEditModal({ onClose, onSaved }: Props) {
   const [status, setStatus] = useState<"loading" | "ready">("loading");
   const [savedUsername, setSavedUsername] = useState("");
   const [username, setUsername] = useState("");
+  const [usernameTouched, setUsernameTouched] = useState(false);
   const [name, setName] = useState("");
   const [school, setSchool] = useState("");
   const [department, setDepartment] = useState("");
@@ -40,6 +42,10 @@ export function ProfileEditModal({ onClose, onSaved }: Props) {
   const onSubmit = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError("");
+    if (usernameError(username) !== "") {
+      setUsernameTouched(true);
+      return;
+    }
     const nextUsername = username.trim();
     const request =
       nextUsername === savedUsername
@@ -73,11 +79,16 @@ export function ProfileEditModal({ onClose, onSaved }: Props) {
           <form className="mt-8 space-y-4" onSubmit={onSubmit}>
             <label className="block text-sm">
               Username
+              {usernameTouched && usernameError(username) && (
+                <p className="text-sm font-medium text-red-600">{usernameError(username)}</p>
+              )}
               <input
                 className="mt-1 w-full border border-[#e6e1d8] bg-white px-3 py-2"
                 value={username}
-                onChange={(event) => setUsername(event.target.value)}
-                required
+                onChange={(event) => {
+                  setUsername(event.target.value);
+                  setUsernameTouched(true);
+                }}
               />
             </label>
             <label className="block text-sm">
@@ -117,7 +128,16 @@ export function ProfileEditModal({ onClose, onSaved }: Props) {
             </label>
             {error && <p className="text-sm">{error}</p>}
             <div className="flex gap-2">
-              <button type="submit" className="border border-[#e6e1d8] px-4 py-2 text-sm">
+              <button
+                type="submit"
+                className="border border-[#e6e1d8] px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-40"
+                disabled={
+                  usernameError(username) !== "" ||
+                  name.trim() === "" ||
+                  school.trim() === "" ||
+                  department.trim() === ""
+                }
+              >
                 保存する
               </button>
               <button
