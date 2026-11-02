@@ -2,3 +2,4 @@
 /backend/server
 
 .env
+.agents/skills/ignore/
