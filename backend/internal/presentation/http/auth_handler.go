@@ -197,7 +197,7 @@ func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-var usernamePattern = regexp.MustCompile(`^[a-z0-9]+$`)
+var usernamePattern = regexp.MustCompile(`^[a-z0-9]{3,25}$`)
 
 func (h *AuthHandler) CreateProfile(w http.ResponseWriter, r *http.Request) {
 	account, ok := h.currentAccount(r)

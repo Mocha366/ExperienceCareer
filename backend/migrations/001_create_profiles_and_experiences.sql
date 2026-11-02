@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS profiles (
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     CONSTRAINT profiles_username_format
-      CHECK (username ~ '^[a-z0-9]+$')
+      CHECK (username ~ '^[a-z0-9]{3,25}$')
 );
 
 CREATE TABLE IF NOT EXISTS experiences (
