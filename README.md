@@ -43,12 +43,13 @@ docker compose exec db psql -U experience -d experience -c 'SELECT 1'
 
 ### テーブルを作る（migration）
 
-DB 起動後、SQL を番号順に流す。`001` で Profile / Experience、`003` で Account（ログイン主体）と `profiles.account_id`。
+DB 起動後、SQL を番号順に流す。`001` で Profile / Experience、`003` で Account（ログイン主体）と `profiles.account_id`、`004` でユーザー名の長さ（3〜25文字）。
 
 ```bash
 cd backend
 docker compose exec -T db psql -U experience -d experience < migrations/001_create_profiles_and_experiences.sql
 docker compose exec -T db psql -U experience -d experience < migrations/003_create_accounts.sql
+docker compose exec -T db psql -U experience -d experience < migrations/004_username_length.sql
 ```
 
 表があることの確認:
